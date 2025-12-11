@@ -1,0 +1,73 @@
+═══════════════════════════════════════════════════════════════════
+  SETUP PROMPT FOR CLAUDE CODE
+═══════════════════════════════════════════════════════════════════
+
+👋 If you just received this project and need to set it up, copy
+everything below this line and paste it into Claude Code.
+
+Claude will guide you through the entire setup process step-by-step.
+
+───────────────────────────────────────────────────────────────────
+COPY EVERYTHING BELOW (including the text)
+───────────────────────────────────────────────────────────────────
+
+Hi Claude! I just cloned the ICS Multi-Agent Backend project from:
+https://github.com/Ayushjo/ics-minor
+
+I need your help to get it running on my system. Please help me:
+
+1. Check what's installed on my system:
+   - Python version (need 3.9+)
+   - Node.js version (need 14+)
+   - Docker (optional but recommended)
+   - Git
+
+2. Install anything that's missing
+
+3. Set up the project:
+   - Install Python dependencies
+   - Install Node.js dependencies
+   - Check if training data exists
+   - Check if ML models exist
+   - Generate/train if needed
+
+4. Start the application:
+   - Guide me on starting the backend
+   - Guide me on starting the frontend
+   - Or help me use Docker if I have it
+
+5. Verify everything works:
+   - Check backend is responding
+   - Check frontend is accessible
+   - Test the simulation
+
+6. Troubleshoot any errors that come up
+
+My system information:
+- Operating System: [Windows/Mac/Linux - I'll tell you]
+- Project Location: [I'll paste the path when you ask]
+- What I have installed: [I'll check when you ask]
+
+Please start by checking what I have installed and guide me
+step-by-step. Ask me to run commands and I'll share the output
+with you.
+
+Let's get started! 🚀
+
+───────────────────────────────────────────────────────────────────
+END OF PROMPT - Paste the above into Claude Code
+───────────────────────────────────────────────────────────────────
+
+💡 TIPS:
+- Have a terminal/command prompt ready
+- Run commands Claude asks you to run
+- Share any error messages you see
+- Be patient - first setup takes 15-20 minutes
+- With Docker, it's much faster!
+
+📚 Alternative: Read SETUP_INSTRUCTIONS.md for manual setup
+
+🐳 Fastest Way: If you have Docker, just run:
+   docker-compose up --build
+
+═══════════════════════════════════════════════════════════════════
