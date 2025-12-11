@@ -1,0 +1,38 @@
+.system-status {
+  margin-bottom: 20px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border-left: 4px solid #2196f3;
+}
+
+.status-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.status-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.status-value.status-ok {
+  color: #4caf50;
+}
+
+.status-value.status-error {
+  color: #f44336;
+}

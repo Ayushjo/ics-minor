@@ -1,0 +1,60 @@
+.risk-assessment {
+  height: 100%;
+}
+
+.risk-section {
+  margin-bottom: 25px;
+}
+
+.risk-section:last-child {
+  margin-bottom: 0;
+}
+
+.risk-level {
+  padding: 15px;
+  border-left: 4px solid #757575;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.risk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.risk-label {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.risk-score {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+.risk-bar {
+  width: 100%;
+  height: 20px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.risk-bar-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.risk-details {
+  margin-top: 15px;
+}
+
+.risk-details p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 14px;
+}

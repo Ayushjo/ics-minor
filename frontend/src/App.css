@@ -1,0 +1,133 @@
+.app-container {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: 0;
+}
+
+.dashboard {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl) var(--spacing-xl);
+}
+
+/* Error Banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--accent-rose-dim);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: var(--radius-lg);
+  color: var(--accent-rose);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Placeholder State */
+.placeholder-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.placeholder-icon {
+  margin-bottom: var(--spacing-xl);
+  color: var(--text-tertiary);
+  opacity: 0.5;
+}
+
+.placeholder-modern h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.02em;
+}
+
+.placeholder-modern p {
+  font-size: 1rem;
+  color: var(--text-tertiary);
+}
+
+/* Stats Grid - Top Row */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Main Row - Chart and Risk Gauges */
+.main-row {
+  display: grid;
+  grid-template-columns: 1fr 450px;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.chart-section {
+  min-height: 420px;
+}
+
+.risk-section {
+  min-height: 420px;
+}
+
+/* Alerts Row */
+.alerts-row {
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Features Grid - Attack Patterns and Sensor Heatmap */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .main-row {
+    grid-template-columns: 1fr;
+  }
+
+  .risk-section {
+    min-height: auto;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .main-row {
+    gap: var(--spacing-md);
+  }
+
+  .features-grid {
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
