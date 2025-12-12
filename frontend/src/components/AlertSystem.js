@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, AlertCircle, Info, XCircle, Check } from 'lucide-react';
+import { Bell, XCircle, AlertTriangle, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import './AlertSystem.css';
 
 function AlertSystem({ socket, latestResults }) {
@@ -21,99 +21,144 @@ function AlertSystem({ socket, latestResults }) {
     const alerts = [];
     const timestamp = new Date().toISOString();
 
-    // Cyber risk alerts
+    // Cyber risk alerts with detailed threat information
     const cyberScore = results.cyber_risk.score;
     const cyberLevel = results.cyber_risk.level;
+    const attackProb = results.cyber_risk.avg_attack_probability || 0;
+    const maxAttackProb = results.cyber_risk.max_attack_probability || 0;
 
     if (cyberScore >= 70) {
       alerts.push({
         id: `cyber-${Date.now()}-${Math.random()}`,
         timestamp,
         severity: 'critical',
-        type: 'cyber_risk',
-        message: `Critical cyber risk detected: ${cyberScore.toFixed(1)}%`,
+        type: 'Cyber Security',
+        message: `Potential ${results.cyber_risk.attack_signature || 'cyber attack'} - ${cyberLevel} threat level`,
+        value: `${cyberScore.toFixed(1)}%`,
         details: {
-          level: cyberLevel,
-          threat: results.cyber_risk.attack_signature
+          'Attack Probability': `${(maxAttackProb * 100).toFixed(1)}%`,
+          'Threat Type': results.cyber_risk.threat_assessment || 'Unknown'
         }
       });
-    } else if (cyberScore >= 50) {
+    } else if (cyberScore >= 40) {
       alerts.push({
         id: `cyber-${Date.now()}-${Math.random()}`,
         timestamp,
         severity: 'high',
-        type: 'cyber_risk',
-        message: `High cyber risk: ${cyberScore.toFixed(1)}%`,
+        type: 'Cyber Security',
+        message: `Elevated cyber threat detected - ${results.cyber_risk.attack_signature || 'monitoring required'}`,
+        value: `${cyberScore.toFixed(1)}%`,
         details: {
-          level: cyberLevel,
-          threat: results.cyber_risk.attack_signature
+          'Risk Level': cyberLevel,
+          'Attack Probability': `${(attackProb * 100).toFixed(1)}%`
         }
       });
-    } else if (cyberScore >= 30) {
+    } else if (cyberScore >= 20) {
       alerts.push({
         id: `cyber-${Date.now()}-${Math.random()}`,
         timestamp,
         severity: 'medium',
-        type: 'cyber_risk',
-        message: `Moderate cyber risk: ${cyberScore.toFixed(1)}%`,
+        type: 'Cyber Security',
+        message: `Moderate cyber activity - ${cyberLevel} level`,
+        value: `${cyberScore.toFixed(1)}%`,
         details: {
-          level: cyberLevel
+          'Status': 'Under Monitoring'
         }
       });
     }
 
-    // Operational risk alerts
+    // Operational risk alerts with affected systems
     const opsScore = results.operational_risk.score;
     const opsLevel = results.operational_risk.level;
+    const affectedSystems = results.operational_risk.affected_systems || [];
+    const faultSeverity = results.operational_risk.fault_severity || 'Unknown';
+    const downtime = results.operational_risk.estimated_downtime || 0;
 
     if (opsScore >= 70) {
       alerts.push({
         id: `ops-${Date.now()}-${Math.random()}`,
         timestamp,
         severity: 'critical',
-        type: 'operational_risk',
-        message: `Critical operational risk: ${opsScore.toFixed(1)}%`,
+        type: 'System Operations',
+        message: `Critical operational issue - ${faultSeverity} severity affecting ${affectedSystems.length} systems`,
+        value: `${opsScore.toFixed(1)}%`,
         details: {
-          level: opsLevel,
-          affected: results.operational_risk.affected_systems?.join(', ')
+          'Affected Systems': affectedSystems.slice(0, 3).join(', ') || 'Multiple',
+          'Est. Downtime': `${downtime} min`,
+          'Safety Impact': results.operational_risk.safety_impact || 'Evaluating'
         }
       });
-    } else if (opsScore >= 50) {
+    } else if (opsScore >= 40) {
       alerts.push({
         id: `ops-${Date.now()}-${Math.random()}`,
         timestamp,
         severity: 'high',
-        type: 'operational_risk',
-        message: `High operational risk: ${opsScore.toFixed(1)}%`,
+        type: 'System Operations',
+        message: `Operational degradation detected - ${affectedSystems.length || 'multiple'} systems affected`,
+        value: `${opsScore.toFixed(1)}%`,
         details: {
-          level: opsLevel
+          'Systems': affectedSystems.slice(0, 2).join(', ') || 'Check dashboard',
+          'Severity': faultSeverity
+        }
+      });
+    } else if (opsScore >= 20) {
+      alerts.push({
+        id: `ops-${Date.now()}-${Math.random()}`,
+        timestamp,
+        severity: 'medium',
+        type: 'System Operations',
+        message: `Minor operational issues - ${opsLevel} level`,
+        value: `${opsScore.toFixed(1)}%`,
+        details: {
+          'Impact': 'Low',
+          'Status': 'Monitoring'
         }
       });
     }
 
-    // Anomaly rate alerts
-    const anomalyRate = results.detection.anomaly_rate * 100;
+    // Anomaly alerts with detailed sensor information
+    const anomalyRate = results.detection.anomaly_rate;
+    const numAnomalies = results.detection.num_anomalies;
+    const batchSize = results.batch_info?.total_samples || 0;
 
-    if (anomalyRate >= 40) {
+    if (anomalyRate >= 0.30) {
       alerts.push({
         id: `anomaly-${Date.now()}-${Math.random()}`,
         timestamp,
         severity: 'critical',
-        type: 'anomaly_detection',
-        message: `Critical anomaly rate: ${anomalyRate.toFixed(1)}%`,
+        type: 'Sensor Anomalies',
+        message: `${numAnomalies} sensors showing critical anomalies out of ${batchSize} total readings`,
+        value: `${(anomalyRate * 100).toFixed(1)}%`,
         details: {
-          count: results.detection.num_anomalies
+          'Anomalous Sensors': `${numAnomalies}`,
+          'Total Readings': `${batchSize}`,
+          'Action': 'Immediate Investigation Required'
         }
       });
-    } else if (anomalyRate >= 25) {
+    } else if (anomalyRate >= 0.15) {
       alerts.push({
         id: `anomaly-${Date.now()}-${Math.random()}`,
         timestamp,
         severity: 'high',
-        type: 'anomaly_detection',
-        message: `High anomaly rate: ${anomalyRate.toFixed(1)}%`,
+        type: 'Sensor Anomalies',
+        message: `${numAnomalies} sensors deviating from normal behavior in current batch`,
+        value: `${(anomalyRate * 100).toFixed(1)}%`,
         details: {
-          count: results.detection.num_anomalies
+          'Flagged Sensors': `${numAnomalies}/${batchSize}`,
+          'Recommendation': 'Check sensor heatmap for details'
+        }
+      });
+    } else if (anomalyRate >= 0.05) {
+      alerts.push({
+        id: `anomaly-${Date.now()}-${Math.random()}`,
+        timestamp,
+        severity: 'medium',
+        type: 'Sensor Anomalies',
+        message: `${numAnomalies} sensor readings showing unusual patterns`,
+        value: `${(anomalyRate * 100).toFixed(1)}%`,
+        details: {
+          'Sensors': `${numAnomalies} flagged`,
+          'Status': 'Within acceptable range'
         }
       });
     }
@@ -121,16 +166,32 @@ function AlertSystem({ socket, latestResults }) {
     return alerts;
   };
 
-  const getAlertIcon = (severity) => {
+  const getSeverityConfig = (severity) => {
     switch (severity) {
       case 'critical':
-        return <XCircle size={18} />;
+        return {
+          icon: <XCircle size={20} />,
+          color: 'rose',
+          label: 'Critical'
+        };
       case 'high':
-        return <AlertTriangle size={18} />;
+        return {
+          icon: <AlertTriangle size={20} />,
+          color: 'amber',
+          label: 'High'
+        };
       case 'medium':
-        return <AlertCircle size={18} />;
+        return {
+          icon: <AlertCircle size={20} />,
+          color: 'blue',
+          label: 'Medium'
+        };
       default:
-        return <Info size={18} />;
+        return {
+          icon: <AlertCircle size={20} />,
+          color: 'blue',
+          label: 'Info'
+        };
     }
   };
 
@@ -142,101 +203,144 @@ function AlertSystem({ socket, latestResults }) {
     setAlerts([]);
   };
 
-  const displayedAlerts = showAll ? alerts : alerts.slice(0, 5);
+  // Ensure we always have a stable reference to displayed alerts
+  const displayedAlerts = React.useMemo(() => {
+    if (alerts.length === 0) return [];
+    return showAll ? alerts : alerts.slice(0, 5);
+  }, [alerts, showAll]);
+
   const criticalCount = alerts.filter(a => a.severity === 'critical').length;
   const highCount = alerts.filter(a => a.severity === 'high').length;
 
   return (
     <motion.div
-      className="card alert-system"
+      className="alert-system-modern"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="alert-header">
-        <div className="alert-title-section">
-          <h3>Real-Time Alerts</h3>
-          <div className="alert-summary">
-            {criticalCount > 0 && (
-              <span className="alert-badge critical">{criticalCount} Critical</span>
-            )}
-            {highCount > 0 && (
-              <span className="alert-badge high">{highCount} High</span>
-            )}
-            {alerts.length === 0 && (
-              <span className="alert-badge normal">All Clear</span>
-            )}
+      {/* Header */}
+      <div className="alert-system-header">
+        <div className="header-content">
+          <div className="header-icon-wrapper">
+            <Bell size={24} />
+          </div>
+          <div className="header-text">
+            <h3>Real-Time Alert Monitor</h3>
+            <p className="header-subtitle">System Health & Security Notifications</p>
           </div>
         </div>
-        {alerts.length > 0 && (
-          <button className="btn-clear" onClick={clearAll}>
-            Clear All
-          </button>
-        )}
+        <div className="header-badges">
+          {criticalCount > 0 && (
+            <div className="status-badge badge-critical">
+              <span className="badge-count">{criticalCount}</span>
+              <span>Critical</span>
+            </div>
+          )}
+          {highCount > 0 && (
+            <div className="status-badge badge-high">
+              <span className="badge-count">{highCount}</span>
+              <span>High</span>
+            </div>
+          )}
+          {alerts.length === 0 && (
+            <div className="status-badge badge-normal">
+              <CheckCircle2 size={16} />
+              <span>All Clear</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="alert-list">
+      {/* Alert List */}
+      <div className="alert-list-modern">
         {alerts.length === 0 ? (
-          <div className="alert-empty">
-            <Check size={32} />
-            <p>No active alerts</p>
-            <span>System operating normally</span>
+          <div className="alert-empty-state">
+            <CheckCircle2 size={48} />
+            <h4>No Active Alerts</h4>
+            <p>System operating within normal parameters</p>
           </div>
         ) : (
-          <AnimatePresence>
-            {displayedAlerts.map((alert, index) => (
-              <motion.div
-                key={alert.id}
-                className={`alert-item alert-${alert.severity}`}
-                initial={{ opacity: 0, x: -20, height: 0 }}
-                animate={{ opacity: 1, x: 0, height: 'auto' }}
-                exit={{ opacity: 0, x: 20, height: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <div className="alert-icon">
-                  {getAlertIcon(alert.severity)}
-                </div>
-                <div className="alert-content">
-                  <div className="alert-message">{alert.message}</div>
-                  <div className="alert-meta">
-                    <span className="alert-type">{alert.type.replace(/_/g, ' ')}</span>
-                    <span className="alert-time">
-                      {new Date(alert.timestamp).toLocaleTimeString()}
-                    </span>
-                  </div>
-                  {alert.details && Object.keys(alert.details).length > 0 && (
-                    <div className="alert-details">
-                      {Object.entries(alert.details).map(([key, value]) => (
-                        value && (
-                          <span key={key}>
-                            {key}: <strong>{value}</strong>
-                          </span>
-                        )
-                      ))}
-                    </div>
-                  )}
-                </div>
+          <>
+            <div className="alerts-container">
+              <AnimatePresence mode="popLayout">
+                {displayedAlerts.map((alert, index) => {
+                  const config = getSeverityConfig(alert.severity);
+                  return (
+                    <motion.div
+                      key={alert.id}
+                      className={`alert-card-compact alert-card-${config.color}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.2 }}
+                      layout
+                    >
+                      <div className="alert-compact-content">
+                        <div className="alert-compact-icon">{config.icon}</div>
+
+                        <div className="alert-compact-main">
+                          <div className="alert-compact-top">
+                            <span className="alert-compact-type">{alert.type}</span>
+                            <span className="alert-compact-severity">{config.label}</span>
+                          </div>
+                          <div className="alert-compact-message">{alert.message}</div>
+                          {alert.details && Object.keys(alert.details).length > 0 && (
+                            <div className="alert-compact-details">
+                              {Object.entries(alert.details).map(([key, value]) => (
+                                value && (
+                                  <span key={key} className="detail-inline">
+                                    {key}: <strong>{value}</strong>
+                                  </span>
+                                )
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="alert-compact-value">{alert.value}</div>
+
+                        <button
+                          className="alert-compact-close"
+                          onClick={() => acknowledgeAlert(alert.id)}
+                          title="Acknowledge"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      <div className="alert-compact-time">
+                        {new Date(alert.timestamp).toLocaleTimeString()}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="alert-footer-actions">
+              {alerts.length > 5 && (
                 <button
-                  className="alert-dismiss"
-                  onClick={() => acknowledgeAlert(alert.id)}
-                  title="Acknowledge"
+                  className="btn-action btn-show-all"
+                  onClick={() => setShowAll(!showAll)}
                 >
-                  ×
+                  {showAll ? 'Show Less' : `Show All (${alerts.length})`}
                 </button>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+              )}
+              {alerts.length > 0 && (
+                <button
+                  className="btn-action btn-clear-all"
+                  onClick={clearAll}
+                >
+                  <X size={16} />
+                  Clear All
+                </button>
+              )}
+            </div>
+          </>
         )}
       </div>
-
-      {alerts.length > 5 && (
-        <button
-          className="btn-show-more"
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? 'Show Less' : `Show All (${alerts.length})`}
-        </button>
-      )}
     </motion.div>
   );
 }

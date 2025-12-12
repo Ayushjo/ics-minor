@@ -21,6 +21,16 @@ from agents import (
     load_and_merge_data
 )
 
+# Import Risk Mapping Agent
+try:
+    from risk_mapping import RiskMappingAgent, get_sensor_risk_matrix
+    RISK_MAPPING_ENABLED = True
+except ImportError:
+    RiskMappingAgent = None
+    get_sensor_risk_matrix = None
+    RISK_MAPPING_ENABLED = False
+    print("Risk mapping features not available")
+
 # Import enhanced features
 try:
     from enhanced_features import (
@@ -42,6 +52,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 coordinator = None
 perception_agent = None
 fault_detector = None
+risk_mapping_agent = None
 test_data = None
 simulation_running = False
 simulation_thread = None
@@ -87,7 +98,7 @@ data_simulator = None
 
 def initialize_system():
     """Initialize all agents and load the model"""
-    global coordinator, perception_agent, fault_detector, test_data, data_simulator
+    global coordinator, perception_agent, fault_detector, risk_mapping_agent, test_data, data_simulator
 
     print("Initializing Multi-Agent System...")
 
@@ -104,6 +115,13 @@ def initialize_system():
         operational_risk_agent = OperationalRiskAssessmentAgent()
         decision_agent = DecisionMakingAgent()
 
+        # Initialize risk mapping agent
+        if RISK_MAPPING_ENABLED:
+            risk_mapping_agent = RiskMappingAgent()
+            print("Risk Mapping Agent initialized")
+        else:
+            risk_mapping_agent = None
+
         # Create coordinator and register all agents
         coordinator = CoordinationAgent()
         coordinator.register_agents(
@@ -111,11 +129,16 @@ def initialize_system():
             fault_detector,
             cyber_risk_agent,
             operational_risk_agent,
-            decision_agent
+            decision_agent,
+            risk_mapping=risk_mapping_agent
         )
 
         # Load test data for simulation
-        data_file = 'data/realtime_simulation_v2.csv'
+        # Use dataset with anomalies for testing risk mapping
+        data_file = 'data/realtime_simulation_with_anomalies.csv'
+        if not os.path.exists(data_file):
+            print(f"Anomaly dataset not found, using default")
+            data_file = 'data/realtime_simulation_v2.csv'
         if not os.path.exists(data_file):
             print(f"Using fallback data")
             data_file = 'data/test_data.csv'
@@ -254,6 +277,74 @@ def upload_data():
         }), 500
 
 
+@app.route('/api/risk-mapping/matrix', methods=['GET'])
+def get_risk_mapping_matrix():
+    """Get the sensor-to-risk mapping matrix"""
+    if not RISK_MAPPING_ENABLED or get_sensor_risk_matrix is None:
+        return jsonify({
+            'status': 'error',
+            'message': 'Risk mapping feature not available'
+        }), 503
+
+    try:
+        matrix = get_sensor_risk_matrix()
+        return jsonify({
+            'status': 'success',
+            'data': matrix
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/risk-mapping/current', methods=['GET'])
+def get_current_risk_mapping():
+    """Get current risk mapping analysis"""
+    if not RISK_MAPPING_ENABLED or risk_mapping_agent is None:
+        return jsonify({
+            'status': 'error',
+            'message': 'Risk mapping feature not available'
+        }), 503
+
+    try:
+        # Get historical summary from the risk mapping agent
+        summary = risk_mapping_agent.get_historical_risk_summary()
+
+        return jsonify({
+            'status': 'success',
+            'data': summary
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/risk-mapping/reset', methods=['POST'])
+def reset_risk_mapping():
+    """Reset risk mapping history"""
+    if not RISK_MAPPING_ENABLED or risk_mapping_agent is None:
+        return jsonify({
+            'status': 'error',
+            'message': 'Risk mapping feature not available'
+        }), 503
+
+    try:
+        risk_mapping_agent.reset_history()
+        return jsonify({
+            'status': 'success',
+            'message': 'Risk mapping history reset successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
 def format_results(results, batch_data):
     """Format the agent results for the frontend"""
     if results['status'] != 'SUCCESS':
@@ -284,7 +375,7 @@ def format_results(results, batch_data):
             'true_normal': int(len(y_true) - y_true.sum())
         }
 
-    return {
+    response = {
         'status': 'success',
         'timestamp': datetime.now().isoformat(),
         'system_state': results['system_state'],
@@ -329,6 +420,12 @@ def format_results(results, batch_data):
         'metrics': metrics,
         'execution_log': results['execution_log'][-10:]  # Last 10 log entries
     }
+
+    # Add risk mapping data if available
+    if 'risk_mapping' in results and results['risk_mapping']:
+        response['risk_mapping'] = results['risk_mapping']
+
+    return response
 
 
 def simulation_loop():

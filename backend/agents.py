@@ -6,12 +6,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 import joblib
 from datetime import datetime
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 from enum import Enum
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
+
+# Import Risk Mapping Agent
+try:
+    from risk_mapping import RiskMappingAgent
+except ImportError:
+    RiskMappingAgent = None
 
 
 def load_and_merge_data(file1_path: str, file2_path: str) -> pd.DataFrame:
@@ -613,17 +619,19 @@ class CoordinationAgent:
         self.cyber_risk_agent = None
         self.operational_risk_agent = None
         self.decision_agent = None
+        self.risk_mapping_agent = None
         self.execution_log = []
         self.system_state = 'INITIALIZED'
 
     def register_agents(self, perception, fault_detection, cyber_risk,
-                       operational_risk, decision_making):
+                       operational_risk, decision_making, risk_mapping=None):
         """Register all agents with coordinator."""
         self.perception_agent = perception
         self.fault_detection_agent = fault_detection
         self.cyber_risk_agent = cyber_risk
         self.operational_risk_agent = operational_risk
         self.decision_agent = decision_making
+        self.risk_mapping_agent = risk_mapping
 
         self.system_state = 'READY'
         self._log_event('All agents registered', 'INFO')
@@ -648,10 +656,24 @@ class CoordinationAgent:
                 cyber_assessment, operational_assessment
             )
 
+            # Map anomalies to system-level risks
+            risk_mapping_results = None
+            if self.risk_mapping_agent:
+                try:
+                    risk_mapping_results = self.risk_mapping_agent.map_anomalies_to_risks({
+                        'predictions': detection_results['predictions'],
+                        'attack_probabilities': detection_results['attack_probabilities'],
+                        'sensor_data': raw_data
+                    })
+                    self._log_event('Risk mapping completed', 'INFO')
+                except Exception as e:
+                    self._log_event(f'Risk mapping error: {str(e)}', 'WARNING')
+                    risk_mapping_results = None
+
             self.system_state = 'COMPLETED'
             self._log_event('Pipeline completed successfully', 'SUCCESS')
 
-            return {
+            result = {
                 'status': 'SUCCESS',
                 'system_state': self.system_state,
                 'detection_results': detection_results,
@@ -660,6 +682,12 @@ class CoordinationAgent:
                 'decisions': decisions,
                 'execution_log': self.execution_log.copy()
             }
+
+            # Add risk mapping results if available
+            if risk_mapping_results:
+                result['risk_mapping'] = risk_mapping_results
+
+            return result
 
         except Exception as e:
             self.system_state = 'ERROR'
@@ -710,6 +738,22 @@ class CoordinationAgent:
         report.append(f"   Score: {ops['operational_risk_score']:.3f}")
         report.append(f"   Severity: {ops['fault_severity']}")
         report.append(f"   Downtime: {ops['estimated_downtime_minutes']} min")
+
+        # Add risk mapping information if available
+        if 'risk_mapping' in results and results['risk_mapping']:
+            risk_map = results['risk_mapping']
+            majority = risk_map.get('majority_risk', {})
+
+            if majority.get('category') != 'None':
+                report.append(f"\nRISK MAPPING ANALYSIS:")
+                report.append(f"   Dominant Risk: {majority['category']}")
+                report.append(f"   Occurrence: {majority['count']} instances ({majority['percentage']:.1f}%)")
+                report.append(f"   Severity: {majority['severity']}")
+                report.append(f"   Affected Stages: {', '.join(majority['affected_stages'])}")
+
+                if majority.get('affected_sensors'):
+                    sensors_str = ', '.join(majority['affected_sensors'][:3])
+                    report.append(f"   Key Sensors: {sensors_str}")
 
         dec = results['decisions']
         report.append(f"\nRECOMMENDED ACTIONS:")

@@ -12,6 +12,7 @@ import AlertSystem from './components/AlertSystem';
 import SensorHeatmap from './components/SensorHeatmap';
 import AttackPatterns from './components/AttackPatterns';
 import HistoricalAnalytics from './components/HistoricalAnalytics';
+import RiskSummary from './components/RiskSummary';
 
 const SOCKET_URL = 'http://localhost:5000';
 
@@ -46,6 +47,7 @@ function App() {
 
     newSocket.on('real_time_update', (data) => {
       console.log('Real-time update received:', data);
+      console.log('risk_mapping data:', data.risk_mapping);
       setLatestResults(data);
 
       // Add to history (keep last 20 data points)
@@ -153,7 +155,7 @@ function App() {
             <div className="stats-grid">
               <StatCard
                 title="Total Samples"
-                value={batchInfo?.total_processed || 0}
+                value={batchInfo?.total_samples || 0}
                 icon={Database}
                 color="blue"
               />
@@ -211,6 +213,11 @@ function App() {
             {/* Historical Analytics */}
             <HistoricalAnalytics socket={socket} />
           </>
+        )}
+
+        {/* Sensor-to-Risk Mapping Summary - Always render for testing */}
+        {latestResults && (
+          <RiskSummary riskMapping={latestResults?.risk_mapping} />
         )}
       </main>
     </div>
